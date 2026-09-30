@@ -1,0 +1,175 @@
+{
+  "evidence_kind": "scripted_demo",
+  "dataset_hash": "a2c4d45362a15c038b6311bc94efee75c1e21603c156df23af6d4672d6a445ae",
+  "dataset": "datasets/semantic-dev.jsonl",
+  "configuration": {
+    "kind": "mock",
+    "model": "scripted-rules",
+    "base_url": "https://api.typesafe.ai",
+    "api_key_env": "TYPESAFE_API_KEY",
+    "threshold": 0.85,
+    "planner": null,
+    "input_usd_per_million": null,
+    "output_usd_per_million": null
+  },
+  "samples": 12,
+  "accuracy": 0.75,
+  "accuracy_ci95_wilson": [
+    0.4676946629183366,
+    0.9110583323051143
+  ],
+  "confusion_matrix": {
+    "allow": {
+      "allow": 4,
+      "block": 0,
+      "review": 0,
+      "error": 0
+    },
+    "block": {
+      "allow": 2,
+      "block": 4,
+      "review": 0,
+      "error": 0
+    },
+    "review": {
+      "allow": 1,
+      "block": 0,
+      "review": 1,
+      "error": 0
+    }
+  },
+  "latency_ms": {
+    "p50": 0.05611599999610917,
+    "p95": 0.2322586500213219,
+    "p99": 0.2599333300804574
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.0,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.05,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.1,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.15,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.2,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.25,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.3,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.35,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.4,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.45,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.5,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.55,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.6,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.65,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.7,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.75,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.8,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.85,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.9,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 0.95,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    },
+    {
+      "threshold": 1.0,
+      "coverage": 0.5833333333333334,
+      "false_accept_rate_among_accepted": 0.42857142857142855,
+      "false_reject_rate_among_allow_labels": 0.0
+    }
+  ],
+  "note": "Tiny authored development fixtures, not a validated safety benchmark. Confidence thresholds must be frozen before held-out testing; do not tune on test labels."
+}

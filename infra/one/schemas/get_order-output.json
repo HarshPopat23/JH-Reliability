@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "order_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "tenant": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "paid",
+        "cancelled"
+      ]
+    },
+    "total_cents": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "refunded_cents": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "order_id",
+    "tenant",
+    "status",
+    "total_cents",
+    "refunded_cents",
+    "version"
+  ],
+  "additionalProperties": false
+}

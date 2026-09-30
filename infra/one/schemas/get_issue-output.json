@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "issue_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "tenant": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "",
+        "completed",
+        "not_planned"
+      ]
+    },
+    "linked_change_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 4096
+    }
+  },
+  "required": [
+    "issue_id",
+    "tenant",
+    "status",
+    "reason",
+    "linked_change_id",
+    "version"
+  ],
+  "additionalProperties": false
+}

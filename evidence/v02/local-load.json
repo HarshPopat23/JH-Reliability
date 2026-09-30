@@ -1,0 +1,16 @@
+{
+  "evidence_kind": "local_mock_gateway_load",
+  "requests": 120,
+  "concurrency": 8,
+  "elapsed_s": 0.6568278779996035,
+  "requests_per_second": 182.6962649110829,
+  "status_counts": {
+    "200": 120
+  },
+  "latency_ms": {
+    "p50": 31.27216600000793,
+    "p95": 49.741485600384294,
+    "p99": 50.85981230008656
+  },
+  "note": "Measures this local deployment only; not live-model throughput or distributed scalability"
+}

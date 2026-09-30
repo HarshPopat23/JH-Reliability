@@ -1,0 +1,13 @@
+{
+  "checked": true,
+  "engine": "jsdom 26.1.0",
+  "variants": 7,
+  "search": true,
+  "evidence_filter": true,
+  "latency_sort_both_directions": true,
+  "details_render": true,
+  "javascript_errors": [],
+  "external_requests": [],
+  "real_browser_rendering_checked": false,
+  "note": "DOM integration checks only. Headless Chromium download was unavailable; visual layout, native details expansion, and browser compatibility remain unverified."
+}

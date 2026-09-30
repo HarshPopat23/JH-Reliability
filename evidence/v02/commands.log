@@ -1,0 +1,328 @@
+Sequential v0.2.0 engineering verification; no learned-model inference.
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/python -c import asyncio,json,aclab
+from aclab.evidence import implementation_fingerprint
+from aclab.registry import Registry
+from aclab.runner import Runner
+from aclab.sandbox import tasks
+from aclab.types import ExperimentConfig
+assert '.wheel-check' in aclab.__file__, aclab.__file__
+async def check():
+    runner=Runner(ExperimentConfig())
+    try:
+        data=tasks(12)
+        for category in ('close','prompt_injection'):
+            row=await runner.run(next(t for t in data if t.category==category))
+            assert row['safe_success'] and row['episode_completed'], category
+    finally:
+        await runner.close()
+asyncio.run(check())
+print(json.dumps({'version':aclab.__version__,'catalog_hash':Registry().hash,'implementation_hash':implementation_fingerprint(),'close_and_injection_passed':True}))
+
+{"version": "0.2.0", "catalog_hash": "fea7b612e55b3d23fc09c7e42d616e312e476e9e7914714742d1bc3400732bf2", "implementation_hash": "0142c714fe87e0b2c411bf36eff032cbea9af303282049e8e369db8eb2b2642b", "close_and_injection_passed": true}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/python -m pip check
+No broken requirements found.
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/aclab preflight --config configs/mock.yaml --matrix combined --tasks 72 --repeats 5
+{
+  "configuration_ready": true,
+  "network_requests": 0,
+  "provider": "mock",
+  "model": "scripted-demo",
+  "mode": "tools",
+  "required_environment_names": [],
+  "missing_environment_names": [],
+  "external_dependencies_not_checked": [],
+  "planned_episodes": 1800,
+  "variant_names": [
+    "baseline",
+    "rich-docs",
+    "schema",
+    "policy",
+    "full"
+  ],
+  "contract_hash": "fea7b612e55b3d23fc09c7e42d616e312e476e9e7914714742d1bc3400732bf2",
+  "catalogs": {
+    "baseline": {
+      "hash": "912a4280be911bb2badd18c9a85daf37555f88a228a568f16bd65608df272bea",
+      "bytes_utf8": 2699
+    },
+    "rich-docs": {
+      "hash": "783210ca1a9ed3903c93259790360b838ea1b1c39b2b77bcbb521096104c9714",
+      "bytes_utf8": 11275
+    },
+    "schema": {
+      "hash": "783210ca1a9ed3903c93259790360b838ea1b1c39b2b77bcbb521096104c9714",
+      "bytes_utf8": 11275
+    },
+    "policy": {
+      "hash": "783210ca1a9ed3903c93259790360b838ea1b1c39b2b77bcbb521096104c9714",
+      "bytes_utf8": 11275
+    },
+    "full": {
+      "hash": "783210ca1a9ed3903c93259790360b838ea1b1c39b2b77bcbb521096104c9714",
+      "bytes_utf8": 11275
+    }
+  },
+  "planner_token_prices_configured": true,
+  "infrastructure_rate_configured": true,
+  "note": "This checks configuration only. It does not verify account access, model availability, server health, token limits, or actual charges. Episode limits are not a dollar cap."
+}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/aclab load --url http://127.0.0.1:8766 --requests 120 --concurrency 8 --output evidence/v02/local-load.json
+{
+  "evidence_kind": "local_mock_gateway_load",
+  "requests": 120,
+  "concurrency": 8,
+  "elapsed_s": 0.6568278779996035,
+  "requests_per_second": 182.6962649110829,
+  "status_counts": {
+    "200": 120
+  },
+  "latency_ms": {
+    "p50": 31.27216600000793,
+    "p95": 49.741485600384294,
+    "p99": 50.85981230008656
+  },
+  "note": "Measures this local deployment only; not live-model throughput or distributed scalability"
+}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/aclab bench --config configs/mock.yaml --matrix combined --tasks 72 --repeats 5 --output evidence/v02/mock-combined
+Completed 20/1800 episodes
+Completed 40/1800 episodes
+Completed 60/1800 episodes
+Completed 80/1800 episodes
+Completed 100/1800 episodes
+Completed 120/1800 episodes
+Completed 140/1800 episodes
+Completed 160/1800 episodes
+Completed 180/1800 episodes
+Completed 200/1800 episodes
+Completed 220/1800 episodes
+Completed 240/1800 episodes
+Completed 260/1800 episodes
+Completed 280/1800 episodes
+Completed 300/1800 episodes
+Completed 320/1800 episodes
+Completed 340/1800 episodes
+Completed 360/1800 episodes
+Completed 380/1800 episodes
+Completed 400/1800 episodes
+Completed 420/1800 episodes
+Completed 440/1800 episodes
+Completed 460/1800 episodes
+Completed 480/1800 episodes
+Completed 500/1800 episodes
+Completed 520/1800 episodes
+Completed 540/1800 episodes
+Completed 560/1800 episodes
+Completed 580/1800 episodes
+Completed 600/1800 episodes
+Completed 620/1800 episodes
+Completed 640/1800 episodes
+Completed 660/1800 episodes
+Completed 680/1800 episodes
+Completed 700/1800 episodes
+Completed 720/1800 episodes
+Completed 740/1800 episodes
+Completed 760/1800 episodes
+Completed 780/1800 episodes
+Completed 800/1800 episodes
+Completed 820/1800 episodes
+Completed 840/1800 episodes
+Completed 860/1800 episodes
+Completed 880/1800 episodes
+Completed 900/1800 episodes
+Completed 920/1800 episodes
+Completed 940/1800 episodes
+Completed 960/1800 episodes
+Completed 980/1800 episodes
+Completed 1000/1800 episodes
+Completed 1020/1800 episodes
+Completed 1040/1800 episodes
+Completed 1060/1800 episodes
+Completed 1080/1800 episodes
+Completed 1100/1800 episodes
+Completed 1120/1800 episodes
+Completed 1140/1800 episodes
+Completed 1160/1800 episodes
+Completed 1180/1800 episodes
+Completed 1200/1800 episodes
+Completed 1220/1800 episodes
+Completed 1240/1800 episodes
+Completed 1260/1800 episodes
+Completed 1280/1800 episodes
+Completed 1300/1800 episodes
+Completed 1320/1800 episodes
+Completed 1340/1800 episodes
+Completed 1360/1800 episodes
+Completed 1380/1800 episodes
+Completed 1400/1800 episodes
+Completed 1420/1800 episodes
+Completed 1440/1800 episodes
+Completed 1460/1800 episodes
+Completed 1480/1800 episodes
+Completed 1500/1800 episodes
+Completed 1520/1800 episodes
+Completed 1540/1800 episodes
+Completed 1560/1800 episodes
+Completed 1580/1800 episodes
+Completed 1600/1800 episodes
+Completed 1620/1800 episodes
+Completed 1640/1800 episodes
+Completed 1660/1800 episodes
+Completed 1680/1800 episodes
+Completed 1700/1800 episodes
+Completed 1720/1800 episodes
+Completed 1740/1800 episodes
+Completed 1760/1800 episodes
+Completed 1780/1800 episodes
+Completed 1800/1800 episodes
+Report: evidence/v02/mock-combined/report.md
+{
+  "full": {
+    "safe_success_rate": 0.9583333333333334,
+    "unsafe_actions": 0,
+    "errors": 0
+  },
+  "policy": {
+    "safe_success_rate": 0.7083333333333334,
+    "unsafe_actions": 90,
+    "errors": 0
+  },
+  "baseline": {
+    "safe_success_rate": 0.5416666666666666,
+    "unsafe_actions": 165,
+    "errors": 0
+  },
+  "rich-docs": {
+    "safe_success_rate": 0.5416666666666666,
+    "unsafe_actions": 165,
+    "errors": 0
+  },
+  "schema": {
+    "safe_success_rate": 0.5416666666666666,
+    "unsafe_actions": 165,
+    "errors": 0
+  }
+}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/aclab bench --config configs/mock.yaml --matrix cache --tasks 72 --repeats 3 --output evidence/v02/mock-cache
+Completed 20/432 episodes
+Completed 40/432 episodes
+Completed 60/432 episodes
+Completed 80/432 episodes
+Completed 100/432 episodes
+Completed 120/432 episodes
+Completed 140/432 episodes
+Completed 160/432 episodes
+Completed 180/432 episodes
+Completed 200/432 episodes
+Completed 220/432 episodes
+Completed 240/432 episodes
+Completed 260/432 episodes
+Completed 280/432 episodes
+Completed 300/432 episodes
+Completed 320/432 episodes
+Completed 340/432 episodes
+Completed 360/432 episodes
+Completed 380/432 episodes
+Completed 400/432 episodes
+Completed 420/432 episodes
+Completed 432/432 episodes
+Report: evidence/v02/mock-cache/report.md
+{
+  "cache-on": {
+    "safe_success_rate": 0.9583333333333334,
+    "unsafe_actions": 0,
+    "errors": 0
+  },
+  "cache-off": {
+    "safe_success_rate": 0.9583333333333334,
+    "unsafe_actions": 0,
+    "errors": 0
+  }
+}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/aclab bench --config configs/mock.yaml --matrix docs --tasks 12 --repeats 1 --output evidence/v02/mock-docs
+Completed 20/60 episodes
+Completed 40/60 episodes
+Completed 60/60 episodes
+Report: evidence/v02/mock-docs/report.md
+{
+  "workflows": {
+    "safe_success_rate": 1.0,
+    "unsafe_actions": 0,
+    "errors": 0
+  },
+  "recovery": {
+    "safe_success_rate": 1.0,
+    "unsafe_actions": 0,
+    "errors": 0
+  },
+  "baseline": {
+    "safe_success_rate": 1.0,
+    "unsafe_actions": 0,
+    "errors": 0
+  },
+  "semantics": {
+    "safe_success_rate": 1.0,
+    "unsafe_actions": 0,
+    "errors": 0
+  },
+  "counterexamples": {
+    "safe_success_rate": 1.0,
+    "unsafe_actions": 0,
+    "errors": 0
+  }
+}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/aclab evaluate --config configs/mock.yaml --output evidence/v02/mock-evaluator
+{
+  "samples": 12,
+  "accuracy": 0.75,
+  "evidence_kind": "scripted_demo",
+  "output": "evidence/v02/mock-evaluator"
+}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/aclab compare evidence/v02/mock-combined evidence/v02/mock-cache --baseline 0:baseline --output evidence/v02/comparison
+{
+  "variants": 7,
+  "paired_eligible": 4,
+  "report": "evidence/v02/comparison/report.html",
+  "inference_requests": 0
+}
+
+$ node /workspace/scratch/0ec8e39c8393/check_report.cjs /workspace/scratch/0ec8e39c8393/agent-contract-lab
+browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-linux64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     npx playwright install                                 ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+
+$ node scripts/check_report.cjs evidence/v02/comparison/report.html evidence/v02/html-check.json
+{
+  "checked": true,
+  "engine": "jsdom 26.1.0",
+  "variants": 7,
+  "search": true,
+  "evidence_filter": true,
+  "latency_sort_both_directions": true,
+  "details_render": true,
+  "javascript_errors": [],
+  "external_requests": [],
+  "real_browser_rendering_checked": false,
+  "note": "DOM integration checks only. Headless Chromium download was unavailable; visual layout, native details expansion, and browser compatibility remain unverified."
+}
+
+$ /workspace/scratch/0ec8e39c8393/agent-contract-lab/.venv/bin/python scripts/verify_evidence.py
+Verified evidence/v02/mock-combined: 1800 episodes
+Verified evidence/v02/mock-cache: 432 episodes
+Verified evidence/v02/mock-docs: 60 episodes
+Verified evidence/v02/comparison: 7 variants
+Hashes, episode coverage, and recomputed summaries match. This verifies consistency, not real-model effectiveness.

@@ -1,0 +1,5 @@
+{
+  "url": "http://localhost:8080",
+  "html": {"name": "Agent Contract Lab schemas"},
+  "contents": {"lab": {"title": "Pinned tool schemas", "path": "./schemas"}}
+}

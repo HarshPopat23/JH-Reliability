@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "issue_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "expected_version": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "issue_id",
+    "expected_version"
+  ],
+  "additionalProperties": false
+}

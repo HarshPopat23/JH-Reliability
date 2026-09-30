@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "change_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "merged": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "change_id",
+    "merged"
+  ],
+  "additionalProperties": false
+}

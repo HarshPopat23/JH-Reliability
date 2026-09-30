@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "description": {
+      "type": "string"
+    },
+    "input_schema": {
+      "type": "object"
+    },
+    "output_schema": {
+      "type": "object"
+    },
+    "intent": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "goal": {
+          "type": "string"
+        },
+        "use_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "avoid_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "goal",
+        "use_when",
+        "avoid_when"
+      ],
+      "additionalProperties": false
+    },
+    "effects": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "mutates": {
+          "type": "boolean"
+        },
+        "resource": {
+          "enum": [
+            "issue",
+            "order"
+          ]
+        },
+        "reversible": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "mutates",
+        "resource",
+        "reversible"
+      ],
+      "additionalProperties": false
+    },
+    "preconditions": {
+      "type": "array",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "cel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "cel"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "postconditions": {
+      "type": "array",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "cel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "cel"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "positive_examples": {
+      "type": "array"
+    },
+    "counterexamples": {
+      "type": "array"
+    },
+    "workflow": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "semantic_check": {
+      "type": "boolean"
+    },
+    "required_scope": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "description",
+    "input_schema",
+    "output_schema",
+    "intent",
+    "effects",
+    "preconditions",
+    "postconditions",
+    "positive_examples",
+    "counterexamples",
+    "workflow",
+    "recovery",
+    "semantic_check",
+    "required_scope"
+  ],
+  "additionalProperties": false
+}
