@@ -1,0 +1,20 @@
+services:
+  one:
+    profiles: [one]
+    build:
+      context: ./infra/one
+    ports: ["127.0.0.1:8080:8000"]
+    restart: unless-stopped
+  redis:
+    profiles: [cache]
+    image: redis:7.4-alpine
+    ports: ["127.0.0.1:6379:6379"]
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+  gateway:
+    profiles: [gateway]
+    build: .
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      ACLAB_API_KEY: ${ACLAB_API_KEY:-}
+      ACLAB_MAX_ACTIVE: "16"
+    restart: unless-stopped

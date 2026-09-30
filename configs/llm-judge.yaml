@@ -1,0 +1,16 @@
+provider:
+  kind: ollama
+  model: ${OLLAMA_MODEL}
+evaluator:
+  kind: llm
+  model: ${JUDGE_MODEL}
+  threshold: 0.85
+  planner:
+    kind: openai
+    model: ${JUDGE_MODEL}
+    api_key_env: OPENAI_API_KEY
+    mode: tools
+enforcement: full
+docs: recovery
+cache: off
+concurrency: 2

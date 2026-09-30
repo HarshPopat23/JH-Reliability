@@ -1,0 +1,11 @@
+provider:
+  kind: mock
+evaluator:
+  kind: mock
+enforcement: full
+docs: recovery
+validator: one
+one_url: http://localhost:8080
+cache: off
+repeats: 3
+concurrency: 4

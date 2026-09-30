@@ -1,0 +1,13 @@
+provider:
+  kind: openai
+  model: ${OPENAI_MODEL}
+  api_key_env: OPENAI_API_KEY
+  max_tokens: 1024
+# Set evaluator.kind to jev with an explicit Jev model, or use llm-judge.yaml.
+# This profile isolates deterministic runtime behavior; it makes no semantic-model claim.
+evaluator:
+  kind: none
+enforcement: policy
+docs: recovery
+repeats: 3
+concurrency: 2

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-contract-lab"
+version = "0.2.0"
+description = "Reproducible experiments for contract-driven AI tool execution"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1",
+  "pydantic>=2.9,<3",
+  "jsonschema>=4.23,<5", "cel-python>=0.4,<1", "PyYAML>=6,<7",
+  "redis>=5,<7", "python-dotenv>=1,<2"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2"]
+
+[project.scripts]
+aclab = "aclab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aclab = ["data/*.json"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

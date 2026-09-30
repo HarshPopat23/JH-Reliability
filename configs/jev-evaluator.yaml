@@ -1,0 +1,9 @@
+provider:
+  kind: mock
+evaluator:
+  kind: jev
+  model: ${JEV_MODEL}
+  api_key_env: TYPESAFE_API_KEY
+  threshold: 0.85
+enforcement: full
+concurrency: 2

@@ -1,0 +1,17 @@
+provider:
+  kind: mock
+  model: scripted-demo
+  input_usd_per_million: 0
+  output_usd_per_million: 0
+evaluator:
+  kind: mock
+  model: scripted-rules
+enforcement: full
+docs: recovery
+validator: jsonschema
+cache: off
+repeats: 3
+concurrency: 4
+seed: 42
+# Explicit demo-only zero-cost assumption. Do not copy this into live cost studies.
+infra_usd_per_second: 0

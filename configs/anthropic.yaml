@@ -1,0 +1,11 @@
+provider:
+  kind: anthropic
+  model: ${ANTHROPIC_MODEL}
+  api_key_env: ANTHROPIC_API_KEY
+  max_tokens: 1024
+evaluator:
+  kind: none
+enforcement: policy
+docs: recovery
+repeats: 3
+concurrency: 2

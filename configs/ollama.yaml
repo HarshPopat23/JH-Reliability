@@ -1,0 +1,14 @@
+provider:
+  kind: ollama
+  model: ${OLLAMA_MODEL}
+  base_url: http://127.0.0.1:11434
+  timeout_s: 120
+  max_tokens: 1024
+  # Choose a downloaded model that supports tool calling. For other models use mode: json.
+  mode: tools
+evaluator:
+  kind: none
+enforcement: policy
+docs: recovery
+repeats: 3
+concurrency: 1

@@ -1,0 +1,13 @@
+# vLLM, llama.cpp server, LM Studio, or another documented Chat Completions-compatible endpoint.
+provider:
+  kind: openai_compatible
+  model: ${COMPATIBLE_MODEL}
+  base_url: ${COMPATIBLE_BASE_URL}
+  api_key_env: COMPATIBLE_API_KEY
+  mode: tools
+  max_tokens: 1024
+evaluator:
+  kind: none
+enforcement: policy
+docs: recovery
+concurrency: 2

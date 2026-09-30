@@ -1,0 +1,16 @@
+# Jev is the semantic evaluator, not a general-purpose conversation planner.
+provider:
+  kind: openai
+  model: ${OPENAI_MODEL}
+  api_key_env: OPENAI_API_KEY
+evaluator:
+  kind: jev
+  model: ${JEV_MODEL}
+  api_key_env: TYPESAFE_API_KEY
+  base_url: https://api.typesafe.ai
+  threshold: 0.85
+enforcement: full
+docs: recovery
+cache: off
+repeats: 3
+concurrency: 2
