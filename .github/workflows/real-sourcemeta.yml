@@ -7,7 +7,7 @@ permissions:
   contents: read
 concurrency:
   group: real-sourcemeta-qwen
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   experiment:
     runs-on: ubuntu-24.04
@@ -44,6 +44,11 @@ jobs:
           sha256sum experiments/hosted-sourcemeta/build/bin/jh_* > results/real-hosted/native-sha256.txt
       - name: Start actual One
         run: |
+          python - <<'PYONE'
+          import json
+          from pathlib import Path
+          p=Path('infra/one/one.json'); c=json.loads(p.read_text()); c['url']='http://127.0.0.1:8080'; p.write_text(json.dumps(c))
+          PYONE
           docker build -t jh-one infra/one 2>&1 | tee results/real-hosted/one-build.log
           docker run -d --name jh-one -p 127.0.0.1:8080:8000 jh-one
           docker inspect jh-one > results/real-hosted/one-container.json
@@ -64,6 +69,9 @@ jobs:
         run: pytest -q
       - name: Execute native, registry, storage and real inference studies
         run: python experiments/hosted-sourcemeta/run.py 2>&1 | tee results/real-hosted/experiment.log
+      - name: Generate evidence-only report
+        if: always()
+        run: python experiments/hosted-sourcemeta/report.py
       - name: Preserve partial or complete evidence
         if: always()
         uses: actions/upload-artifact@v4

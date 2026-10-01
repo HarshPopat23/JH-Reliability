@@ -102,7 +102,7 @@ async def one():
     deps=await client.get(f'http://127.0.0.1:8080/self/v1/api/schemas/dependencies/lab/{key}')
     traces=[]
     for instance in (x,None):
-     t=time.perf_counter_ns();tr=await client.post(f'http://127.0.0.1:8080/self/v1/api/schemas/trace/lab/{key}',json=instance);tr.raise_for_status();trace=tr.json()
+     t=time.perf_counter_ns();tr=await client.post(f'http://127.0.0.1:8080/self/v1/api/schemas/trace/lab/{key}',content=canonical(instance),headers={'Content-Type':'application/json'});tr.raise_for_status();trace=tr.json()
      assert type(trace.get('valid')) is bool
      traces.append({'instance':instance,'trace':trace,'http_ns':time.perf_counter_ns()-t})
     records.append({'key':key,'fetch_ns':fetch_ns,'schema_sha256':digest(schema),'dependencies_status':deps.status_code,'dependencies_body':deps.text,'traces':traces})
