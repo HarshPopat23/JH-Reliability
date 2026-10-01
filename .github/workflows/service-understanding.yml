@@ -1,7 +1,7 @@
 name: Service understanding multi-model pilot
 on:
   push:
-    branches: ['experiment/service-understanding-20261001']
+    branches: ['experiment/service-understanding-next-20261001']
     paths: ['experiments/service-understanding/**', '.github/workflows/service-understanding.yml']
   workflow_dispatch:
 permissions:
@@ -79,4 +79,22 @@ jobs:
         with:
           name: service-understanding-${{ matrix.label }}
           path: results/service-understanding*
+          retention-days: 30
+  report:
+    if: always()
+    needs: study
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: service-understanding-*
+          path: combined-evidence
+      - name: Compare observed evidence
+        run: python3 experiments/service-understanding/compare.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: service-understanding-comparison
+          path: results/service-understanding-comparison
           retention-days: 30

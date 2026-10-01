@@ -86,8 +86,19 @@ def document(family, arm):
   return {'operation': f'POST /{family}', 'schema': basic}
  if arm == 'moderate': return {'operation': f'POST /{family}', 'schema': contract(family)}
  if arm == 'prose':
-  # Same factual content as rich; serialize assertions as a plain table-like string.
-  return 'SERVICE FACTS\n'+canonical(facts)+'\nREQUEST REQUIREMENTS\n'+canonical(contract(family))
+  # Same rich facts and assertions in prose, without JSON Schema/OpenAPI syntax.
+  return '\n'.join([
+   f"Operation: POST /{family}. Service version: 2. Request body is required.",
+   facts['meaning'], facts['resource'], facts['expected_version'], facts['idempotency_key'], facts['permission'],
+   'Request is an object. All five fields are required; no other fields are permitted.',
+   'resource: string. value: integer, at least zero.',
+   f"unit: exactly the string {spec['unit']}. expected_version: exactly the integer 2.",
+   'idempotency_key: string with at least one character.',
+   'Example request: '+canonical(facts['example']),
+   'Response 200 means completed. Response is an object containing exactly status and version.',
+   'status: either done or duplicate. version: integer, at least one.',
+   'Request schema dialect: JSON Schema Draft 2020-12. Interface description version: OpenAPI 3.1.0.'
+  ])
  version = 1 if arm == 'stale' else 2
  if arm == 'false':
   facts['meaning'] = f"The value uses {spec['old_unit']}; do not convert the supplied value."
@@ -213,7 +224,7 @@ def summarize(out, rows, manifest):
   '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
  for r in table:
   lines.append(f"| {r['arm']} | {r['n']} | {r['correct']}/{r['n']} | {r['success']}/{r['n']} | {r['schema_rejected']} | {r['backend_rejected']} | {r['errors']} | {r['p50_ms']:.1f} | {r['p95_ms']:.1f} |")
- lines += ['', '## Attribution and confidence', '', 'Matched task-cluster bootstrap differences and intervals are in analysis.json. Rich-minus-prose tests representation only approximately: prose retains structured requirements in plain text, so this pilot does not fully isolate prose syntax. Rich/poor differ in information content and length. False/stale documentation tests corruption robustness, not richness alone.', '',
+ lines += ['', '## Attribution and confidence', '', 'Matched task-cluster bootstrap differences and intervals are in analysis.json. Rich-minus-prose uses the same factual content; length and presentation can still differ. Rich/poor differ in information content and length. False/stale documentation tests corruption robustness, not richness alone.', '',
   'Calibration compares raw self-reported correctness probability with development-fit histogram probabilities on test tasks. This postprocessor does not change model choices. Repeats are clustered; there are only twelve held-out tasks across three families. Do not claim general calibration or unseen-service performance.', '',
   '## Component boundaries', '', 'Native Blaze validates runtime requests/responses and logs actual calls/identity. Backend checks enforce state and permission independently. One startup fetch/digest and refresh/outage probes are separate infrastructure evidence. AlterSchema transformation and compile reuse do not imply model-call savings. Correctly shaped but semantically wrong requests may pass Blaze and fail the backend.', '',
   '## Evidence', '', 'See manifest.json, tasks.json, episodes.jsonl, native-calls.json, infrastructure.json and analysis.json. Missing components are blocked, never silently replaced. Monetary inference cost is unknown for local CPU execution; input/output tokens and hardware execution time are available. Real Jev comparison is blocked without credentials.']
