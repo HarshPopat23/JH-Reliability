@@ -40,7 +40,9 @@ jobs:
       - name: Compile genuine native engines
         run: |
           cmake -S experiments/hosted-sourcemeta -B experiments/hosted-sourcemeta/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBLAZE_SOURCE=/tmp/jh-blaze -DBINPACK_SOURCE=/tmp/jh-binpack 2>&1 | tee results/real-hosted/cmake.log
-          cmake --build experiments/hosted-sourcemeta/build --target jh_blaze_worker jh_binpack -j 4 2>&1 | tee results/real-hosted/build.log
+          cmake --build experiments/hosted-sourcemeta/build --target jh_blaze_worker -j 4 2>&1 | tee results/real-hosted/build.log
+          cmake -S experiments/hosted-sourcemeta/binpack-build -B experiments/hosted-sourcemeta/bp-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBINPACK_SOURCE=/tmp/jh-binpack -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="$PWD/experiments/hosted-sourcemeta/build/bin" 2>&1 | tee results/real-hosted/binpack-cmake.log
+          cmake --build experiments/hosted-sourcemeta/bp-build --target jh_binpack -j 4 2>&1 | tee results/real-hosted/binpack-build.log
           sha256sum experiments/hosted-sourcemeta/build/bin/jh_* > results/real-hosted/native-sha256.txt
       - name: Start actual One
         run: |

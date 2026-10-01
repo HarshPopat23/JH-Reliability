@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.24)
+project(jh_binpack_runner LANGUAGES CXX)
+set(JSONBINPACK_INSTALL OFF CACHE BOOL "" FORCE)
+set(JSONBINPACK_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(${BINPACK_SOURCE} jsonbinpack)
+add_executable(jh_binpack ../binpack.cc)
+target_link_libraries(jh_binpack PRIVATE sourcemeta::jsonbinpack::compiler sourcemeta::jsonbinpack::runtime sourcemeta::core::json sourcemeta::core::jsonschema)
