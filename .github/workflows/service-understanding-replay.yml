@@ -1,0 +1,57 @@
+name: Saved model bodies native Blaze audit
+on:
+  push:
+    branches: ['experiment/service-understanding-replay-20261001']
+    paths: ['experiments/service-understanding/replay.py', '.github/workflows/service-understanding-replay.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    env:
+      ACLAB_BLAZE_WORKER: ${{ github.workspace }}/experiments/hosted-sourcemeta/build/bin/jh_blaze_worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build identical native validator
+        run: |
+          pip install -e .
+          git clone https://github.com/sourcemeta/blaze.git /tmp/jh-blaze
+          git -C /tmp/jh-blaze checkout 059dbed08ea26bd9a630bad5eb07421f4cc34cc0
+          cmake -S experiments/hosted-sourcemeta -B experiments/hosted-sourcemeta/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBLAZE_SOURCE=/tmp/jh-blaze
+          cmake --build experiments/hosted-sourcemeta/build --target jh_blaze_worker -j 4
+      - name: Wait for twelve complete source artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.request
+          url='https://api.github.com/repos/HarshPopat23/JH-Reliability/actions/runs/36907463064/artifacts?per_page=100'
+          expected={f'service-understanding-{m}-shard-{s}' for m in ['qwen','gemma'] for s in range(6)}
+          for _ in range(120):
+            request=urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+            with urllib.request.urlopen(request) as response:data=json.load(response)
+            names={a['name'] for a in data['artifacts'] if not a['expired']}
+            if expected<=names:break
+            print(f'Waiting for source artifacts: {len(expected&names)}/12',flush=True);time.sleep(30)
+          else:raise RuntimeError('Source artifact wait timed out')
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: service-understanding-*-shard-*
+          run-id: 36907463064
+          github-token: ${{ github.token }}
+          path: combined-evidence
+      - name: Replay actual proposals, no new inference
+        run: python experiments/service-understanding/replay.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: service-understanding-native-replay
+          path: results/service-understanding-replay
+          retention-days: 30
