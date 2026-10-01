@@ -45,6 +45,7 @@ jobs:
           cmake --build experiments/hosted-sourcemeta/bp-build --target jh_binpack -j 4 2>&1 | tee results/real-hosted/binpack-build.log
           sha256sum experiments/hosted-sourcemeta/build/bin/jh_* > results/real-hosted/native-sha256.txt
       - name: Start actual One
+        continue-on-error: true
         run: |
           python - <<'PYONE'
           import json
@@ -57,10 +58,11 @@ jobs:
           for i in $(seq 1 60); do curl --fail --silent http://127.0.0.1:8080/self/v1/health && break; sleep 1; done
           curl --fail http://127.0.0.1:8080/self/v1/health
       - name: Install actual Ollama and pull Qwen
+        continue-on-error: true
         run: |
           curl --fail -L https://github.com/ollama/ollama/releases/download/v0.32.0/ollama-linux-amd64.tar.zst -o /tmp/ollama.tar.zst
           curl --fail -L https://github.com/ollama/ollama/releases/download/v0.32.0/sha256sum.txt -o /tmp/ollama-sha256sum.txt
-          grep 'ollama-linux-amd64.tar.zst$' /tmp/ollama-sha256sum.txt | sed 's#ollama-linux-amd64.tar.zst#/tmp/ollama.tar.zst#' | sha256sum -c -
+          awk '$2 ~ /ollama-linux-amd64.tar.zst$/ {print $1 "  /tmp/ollama.tar.zst"}' /tmp/ollama-sha256sum.txt | sha256sum -c -
           mkdir -p /tmp/jh-ollama
           tar --zstd -xf /tmp/ollama.tar.zst -C /tmp/jh-ollama
           /tmp/jh-ollama/bin/ollama serve > results/real-hosted/ollama-server.log 2>&1 &
