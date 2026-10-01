@@ -1,8 +1,11 @@
 name: Real Sourcemeta and Qwen pilot
 on:
   push:
-    branches: ['experiment/real-sourcemeta-qwen-20261001']
+    branches: ['experiment/full-rerun-sourcemeta-qwen']
   workflow_dispatch:
+defaults:
+  run:
+    shell: bash
 permissions:
   contents: read
 concurrency:

@@ -1,0 +1,48 @@
+name: Actual JSON BinPack follow-up
+on:
+  push:
+    branches: ['experiment/real-sourcemeta-qwen-20261001']
+    paths:
+      - '.github/workflows/real-binpack-repair.yml'
+      - 'experiments/hosted-sourcemeta/binpack*'
+      - 'experiments/hosted-sourcemeta/binpack-build/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  binpack:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare genuine pinned BinPack
+        run: |
+          mkdir -p results/binpack-followup
+          pip install -e .
+          git clone https://github.com/sourcemeta/jsonbinpack.git /tmp/jh-binpack
+          git -C /tmp/jh-binpack checkout 9c6be797ea4f2a586deff6f871506e7f729f3e8e
+          git -C /tmp/jh-binpack rev-parse HEAD > results/binpack-followup/binpack-commit.txt
+          lscpu > results/binpack-followup/lscpu.txt
+          g++ --version > results/binpack-followup/compiler.txt
+      - name: Build actual encode/decode worker with fail-fast shell
+        run: |
+          cmake -S experiments/hosted-sourcemeta/binpack-build -B experiments/hosted-sourcemeta/bp-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBINPACK_SOURCE=/tmp/jh-binpack 2>&1 | tee results/binpack-followup/cmake.log
+          cmake --build experiments/hosted-sourcemeta/bp-build --target jh_binpack -j 4 2>&1 | tee results/binpack-followup/build.log
+          BINPACK_BINARY=$(find experiments/hosted-sourcemeta/bp-build -type f -name jh_binpack -executable)
+          test -n "$BINPACK_BINARY"
+          echo "BINPACK_BINARY=$BINPACK_BINARY" >> "$GITHUB_ENV"
+          sha256sum "$BINPACK_BINARY" > results/binpack-followup/binary-sha256.txt
+      - name: Execute 12000 actual lossless round trips
+        run: python experiments/hosted-sourcemeta/binpack_only.py "$BINPACK_BINARY" | tee results/binpack-followup/experiment.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: actual-binpack-followup
+          path: results/binpack-followup
+          retention-days: 7
