@@ -26,11 +26,13 @@ class Runner:
         self.owns_cache = cache is None
         self.provider = ModelProvider(config.provider, self.client)
         self.evaluator = Evaluator(config.evaluator, self.client, self.cache)
-        self.validator = Validator(self.registry, config.validator, config.one_url, self.client)
+        self.validator = Validator(self.registry, config.validator, config.one_url, self.client, config.blaze_worker_path)
         self.gateway = Gateway(config, self.registry, self.validator, self.evaluator)
         self.slots = asyncio.Semaphore(config.concurrency)
 
     async def close(self):
+        if hasattr(self.validator, "close"):
+            await self.validator.close()
         if self.owns_client:
             await self.client.aclose()
         if self.owns_cache:
@@ -62,7 +64,7 @@ class Runner:
                             break
                         for call in proposal.calls:
                             feedback = await self.gateway.process(call, sandbox, actor, task.prompt, episode_id)
-                            record = {"stage": "gateway", "step": step, "call": call.model_dump(), "feedback": feedback, "fixture_label_safe": labeled_call_safe(task, call.model_dump()), "fixture_schema_valid": not self.registry.local_validate(call.tool_id, "input", call.arguments) if call.tool_id in self.registry.contracts else False}
+                            record = {"stage": "gateway", "step": step, "call": call.model_dump(), "feedback": feedback}
                             trace.append(record)
                             history.append({"call": call.model_dump(exclude={"call_id"}), "feedback": {k: v for k, v in feedback.items() if k not in ("stages", "latency_ms", "semantic")}})
                             semantic = feedback.get("semantic")
@@ -90,6 +92,13 @@ class Runner:
                 usage_records.append({"input_tokens": None, "output_tokens": None, "attempts": 1})
                 trace.append({"stage": "error", "code": error})
             elapsed = time.perf_counter() - started
+            # Fixture scoring is an offline measurement step, excluded from task timing.
+            scoring_started = time.perf_counter()
+            for record in trace:
+                if record["stage"] == "gateway":
+                    call = record["call"]
+                    record["fixture_label_safe"] = labeled_call_safe(task, call)
+                    record["fixture_schema_valid"] = not self.registry.local_validate(call["tool_id"], "input", call["arguments"]) if call["tool_id"] in self.registry.contracts else False
             metrics = score(task, sandbox)
             state_goal_satisfied = metrics["task_success"]
             episode_completed = finish_reason == "model_finished" and error is None
@@ -107,6 +116,8 @@ class Runner:
                 "evidence_kind": "scripted_demo" if self.config.provider.kind == "mock" else "live_model",
                 "evaluator_evidence_kind": "scripted_demo" if self.config.evaluator.kind == "mock" else self.config.evaluator.kind,
                 "latency_ms": elapsed * 1000, "queue_ms": (started - queued) * 1000,
+                "validator_engine": self.config.validator,
+                "offline_scoring_ms": (time.perf_counter() - scoring_started) * 1000,
                 "model_calls": model_calls, "proposed_calls": len(calls), "blocked_calls": sum(c["feedback"]["decision"] == "blocked" for c in calls),
                 "review_calls": sum(c["feedback"]["decision"] == "review" for c in calls),
                 "schema_invalid_proposals": sum(not c["fixture_schema_valid"] for c in calls),

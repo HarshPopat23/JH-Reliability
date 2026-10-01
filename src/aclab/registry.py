@@ -75,12 +75,24 @@ class Registry:
 
 
 class Validator:
-    def __init__(self, registry: Registry, backend: str = "jsonschema", one_url: str = "http://127.0.0.1:8080", client=None):
+    def __init__(self, registry: Registry, backend: str = "jsonschema", one_url: str = "http://127.0.0.1:8080", client=None, blaze_worker_path=None):
         self.registry, self.backend, self.one_url = registry, backend, one_url.rstrip("/")
         self.client = client
         self.checked_remote: set[str] = set()
+        self.native = None
+        if backend == "blaze":
+            from .native import NativeBlaze
+            self.native = NativeBlaze(registry, blaze_worker_path)
+        elif backend not in ("jsonschema", "one"):
+            raise ValueError("Unknown validator backend")
+
+    async def close(self):
+        if self.native:
+            await self.native.close()
 
     async def validate(self, name: str, direction: str, instance):
+        if self.native:
+            return await self.native.validate(name, direction, instance)
         if self.backend == "jsonschema":
             return self.registry.local_validate(name, direction, instance)
         c = self.registry.get(name)

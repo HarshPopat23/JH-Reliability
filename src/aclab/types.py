@@ -77,7 +77,8 @@ class ExperimentConfig(StrictModel):
     evaluator: EvaluatorConfig = Field(default_factory=EvaluatorConfig)
     docs: Literal["baseline", "semantics", "counterexamples", "workflows", "recovery"] = "recovery"
     enforcement: Literal["baseline", "schema", "policy", "full"] = "full"
-    validator: Literal["jsonschema", "one"] = "jsonschema"
+    validator: Literal["jsonschema", "one", "blaze"] = "jsonschema"
+    blaze_worker_path: str | None = None
     one_url: str = "http://127.0.0.1:8080"
     cache: Literal["off", "memory", "redis"] = "off"
     cache_ttl_s: int = Field(default=60, ge=1, le=3600)
