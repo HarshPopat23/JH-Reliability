@@ -1,13 +1,29 @@
 """Build combined report from actually downloaded model artifacts only."""
 import argparse
 import json
+import importlib.util
 from pathlib import Path
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--input',default='combined-evidence');p.add_argument('--output',default='results/service-understanding-comparison');args=p.parse_args()
  root=Path(args.input);out=Path(args.output);out.mkdir(parents=True,exist_ok=True)
- analyses=[json.loads(path.read_text()) for path in root.rglob('analysis.json') if 'offline' not in str(path) and 'preflight' not in str(path)]
- unique={a['manifest']['model']:a for a in analyses}
+ spec=importlib.util.spec_from_file_location('service_study',Path(__file__).with_name('study.py'))
+ study=importlib.util.module_from_spec(spec);spec.loader.exec_module(study)
+ grouped={}; manifests={}
+ for path in root.rglob('episodes.jsonl'):
+  manifest=json.loads(path.with_name('manifest.json').read_text());model=manifest['model']
+  manifests.setdefault(model,[]).append(manifest)
+  grouped.setdefault(model,[]).extend(json.loads(line) for line in path.read_text().splitlines() if line.strip())
+ unique={}
+ for model,rows in grouped.items():
+  keys=[(r['task_id'],r['arm'],r['repeat']) for r in rows]
+  if len(keys)!=len(set(keys)): raise RuntimeError('Duplicate retained episode keys')
+  destination=out/model.replace(':','-');destination.mkdir(exist_ok=True)
+  manifest={'model':model,'status':'completed' if len(rows)==840 and all(m['status']=='completed' for m in manifests[model]) else 'partial',
+   'completed':len(rows),'planned':840,'shard_manifests':manifests[model]}
+  study.summarize(destination,rows,manifest)
+  unique[model]=json.loads((destination/'analysis.json').read_text())
+  (destination/'episodes.jsonl').write_text('\n'.join(study.canonical(r) for r in rows)+'\n')
  lines=['# Multi-model service-understanding comparison','','Only completed/partial artifact measurements are reported. Synthetic first-action pilot; confidence calibration remains task-specific.','',
  '| Model | Documentation | Held-out n | Correct | Safe completion | Schema rejects | Backend rejects | p50 ms | p95 ms |',
  '|---|---|---:|---:|---:|---:|---:|---:|---:|']

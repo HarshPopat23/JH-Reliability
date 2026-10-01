@@ -32,7 +32,7 @@ BODY = {'$schema': 'https://json-schema.org/draft/2020-12/schema', 'type': 'obje
  'resource': {'type': 'string'}, 'value': {'type': 'integer', 'minimum': 0},
  'unit': {'type': 'string'}, 'expected_version': {'type': 'integer', 'minimum': 1},
  'idempotency_key': {'type': 'string', 'minLength': 1}}}
-RESPONSE = {'type': 'object', 'required': ['status', 'version'], 'additionalProperties': False,
+RESPONSE = {'$schema': 'https://json-schema.org/draft/2020-12/schema', 'type': 'object', 'required': ['status', 'version'], 'additionalProperties': False,
  'properties': {'status': {'enum': ['done', 'duplicate']}, 'version': {'type': 'integer', 'minimum': 1}}}
 ENVELOPE = {'type': 'object', 'required': ['action', 'body', 'probability_correct'],
  'additionalProperties': False, 'properties': {
@@ -232,9 +232,11 @@ def summarize(out, rows, manifest):
 
 async def run(args):
  out = Path(args.output); out.mkdir(parents=True,exist_ok=True)
- selected = tasks()[:args.tasks]; (out/'tasks.json').write_text(json.dumps(selected,indent=2))
+ selected = [t for i,t in enumerate(tasks()[:args.tasks]) if (i//2)%args.shards == args.shard]
+ (out/'tasks.json').write_text(json.dumps(selected,indent=2))
  manifest = {'model': args.model, 'status': 'in_progress', 'planned': len(selected)*len(ARMS)*args.repeats,
   'completed': 0, 'commit': os.getenv('GITHUB_SHA'), 'repeats': args.repeats,
+  'shard':args.shard,'shards':args.shards,
   'task_sha256': digest(selected), 'settings': {'temperature': .2, 'num_ctx': 4096, 'num_predict': 128},
   'native': 'blocked', 'one': 'not_configured', 'jev': 'blocked_no_credentials'}
  native = None; rows = []; infrastructure = {'deterministic_backend_probes': probes()}
@@ -262,6 +264,14 @@ async def run(args):
      if digest(remote) != digest(contract(family)): raise RuntimeError('Registry drift')
      fetched.append({'family': family, 'digest': digest(remote), 'status': r.status_code})
     manifest['one'] = 'live_fetch_verified'; infrastructure['one'] = fetched
+   # Compile diagnostic before the protocol adapter: preserve native stderr on failure.
+   diagnostic = out/'native-startup'; diagnostic.mkdir(exist_ok=True)
+   for family in FAMILIES:
+    for direction,schema in [('input',contract(family)),('output',RESPONSE)]:
+     (diagnostic/f'{family}-{direction}.json').write_text(canonical(schema))
+   startup = subprocess.run([worker,str(diagnostic)],input='',capture_output=True,text=True,timeout=30)
+   (out/'native-startup.json').write_text(json.dumps({'returncode':startup.returncode,'stdout':startup.stdout,'stderr':startup.stderr},indent=2))
+   if startup.returncode != 0: raise RuntimeError('Native compilation failed; see native-startup.json')
    transforms = []
    for family in FAMILIES:
     p = out/f'{family}-v2.json'; p.write_text(canonical(contract(family)))
@@ -269,7 +279,7 @@ async def run(args):
     transformed = json.loads(tr.stdout)
     transforms.append({'family': family,'input_digest':digest(contract(family)), 'output_digest':digest(transformed), 'wall_ns':time.perf_counter_ns()-start})
     # Explicit request/output probes outside episode timing.
-    assert not await native.validate(family,'input',next(t['gold'] for t in selected if t['family']==family))
+    assert not await native.validate(family,'input',next(t['gold'] for t in tasks() if t['family']==family))
     assert await native.validate(family,'output',{'acknowledged':True})
    infrastructure['alterschema'] = transforms
    infrastructure['native_ready'] = native.ready
@@ -301,7 +311,8 @@ async def run(args):
     row = {'task_id':task['id'],'family':task['family'],'split':task['split'],'arm':arm,'repeat':repeat,
      'document_sha256':digest(docs),'request_sha256':digest(body),'error':None,'correct_candidate':False,
      'safe_success':False,'schema_rejected':False,'backend_rejected':False,'probability':None,
-     'input_tokens':None,'output_tokens':None,'native_validator':native.identity}
+     'input_tokens':None,'output_tokens':None,'native_validator':native.identity,
+     'without_blaze':None}
     start = time.perf_counter_ns(); before = len(native.calls)
     try:
      r = await client.post('http://127.0.0.1:11434/api/chat',json=body); r.raise_for_status(); response = r.json()
@@ -311,6 +322,15 @@ async def run(args):
      if type(p) in (int,float) and math.isfinite(p) and 0<=p<=1: row['probability'] = p
      candidate = proposal.get('body'); row['correct_candidate'] = candidate == task['gold']
      if proposal.get('action') == 'execute':
+      # Matched layer intervention: same candidate, fresh backend state, real HTTP.
+      # This is a first-action comparison, not a feedback-loop agent ablation.
+      ServiceHandler.backends[task['id']] = Backend(task)
+      plain_start = time.perf_counter_ns()
+      plain = await client.post(f'http://127.0.0.1:{server.server_port}/{task["family"]}',json=candidate,headers={'X-Task-ID':task['id']})
+      row['without_blaze'] = {'http_status':plain.status_code,'response':plain.json(),
+       'backend_writes':ServiceHandler.backends[task['id']].writes,
+       'safe_success':plain.status_code==200 and row['correct_candidate'],
+       'wall_ms':(time.perf_counter_ns()-plain_start)/1e6}
       if await native.validate(task['family'],'input',candidate): row['schema_rejected'] = True
       else:
        ServiceHandler.backends[task['id']] = Backend(task)
@@ -326,6 +346,10 @@ async def run(args):
     manifest['completed'] = len(rows); (out/'manifest.json').write_text(json.dumps(manifest,indent=2))
     if len(rows)%20 == 0: print(f"{args.model}: {len(rows)}/{len(schedule)}",flush=True)
    manifest['status'] = 'completed'
+ except Exception as exc:
+  manifest['status'] = 'failed'
+  manifest['failure'] = {'type':type(exc).__name__,'message':str(exc)}
+  raise
  finally:
   server.shutdown(); (out/'native-calls.json').write_text(json.dumps(native.calls,indent=2)); await native.close()
   (out/'infrastructure.json').write_text(json.dumps(infrastructure,indent=2))
@@ -335,4 +359,5 @@ if __name__ == '__main__':
  parser = argparse.ArgumentParser(); parser.add_argument('--model',default='qwen3:4b-instruct')
  parser.add_argument('--tasks',type=int,default=24); parser.add_argument('--repeats',type=int,default=5)
  parser.add_argument('--output',default='results/service-understanding'); parser.add_argument('--offline',action='store_true')
+ parser.add_argument('--shard',type=int,default=0); parser.add_argument('--shards',type=int,default=1)
  asyncio.run(run(parser.parse_args()))

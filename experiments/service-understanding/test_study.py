@@ -20,6 +20,7 @@ def test_version_contracts_are_distinct():
  assert not Draft202012Validator(m.contract('refund',2)).is_valid({**m.tasks()[0]['gold'],'expected_version':1})
 
 def test_every_gold_follows_authoritative_contract():
+ assert m.RESPONSE['$schema'] == m.BODY['$schema']
  for task in m.tasks():
   assert Draft202012Validator(m.contract(task['family'])).is_valid(task['gold'])
   assert m.Backend(task).execute(task['gold'])[0] == 200
@@ -29,3 +30,10 @@ def test_calibration_uses_only_development_labels():
  result = m.calibration(rows)
  assert result['mapping'][4] == 2/3
  assert result['raw']['brier'] == .81
+
+def test_shards_are_disjoint_and_cover_balanced_splits():
+ groups=[[t for i,t in enumerate(m.tasks()) if (i//2)%6==s] for s in range(6)]
+ assert sum(map(len,groups))==24
+ assert len({t['id'] for group in groups for t in group})==24
+ assert all(sum(t['split']=='dev' for t in group)==2 for group in groups)
+ assert all(sum(t['split']=='test' for t in group)==2 for group in groups)
