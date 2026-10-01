@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "models": {
+    "qwen3:4b-instruct": {
+      "episodes": 840,
+      "missing": 0,
+      "errors": 0,
+      "model_digests": [
+        "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0"
+      ],
+      "commits": [
+        "8e79ddec72a63f8bf07c0e2f77d306771e87f8b1"
+      ]
+    },
+    "gemma3:1b": {
+      "episodes": 840,
+      "missing": 0,
+      "errors": 20,
+      "model_digests": [
+        "8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc"
+      ],
+      "commits": [
+        "8e79ddec72a63f8bf07c0e2f77d306771e87f8b1"
+      ]
+    }
+  },
+  "issues": []
+}

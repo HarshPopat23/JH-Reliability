@@ -12,5 +12,5 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python -m pip install -e '.[dev]'
-      - run: python -m pytest -q
+      - run: python -m pytest -q tests experiments/service-understanding/test_study.py experiments/service-understanding/test_reporting.py
       - run: aclab bench --tasks 12 --repeats 1 --output results/ci
